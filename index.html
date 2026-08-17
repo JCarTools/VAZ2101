@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#080907">
+  <title>ВАЗ-2101 — ретро приборка</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="dashboard" aria-label="Ретро приборная панель ВАЗ-2101">
+    <div class="grain" aria-hidden="true"></div>
+
+    <section class="cluster">
+      <div class="cluster__rim">
+        <div class="cluster__glass">
+          <div class="cluster__inner">
+            <div class="gauge gauge--fuel" aria-label="Уровень топлива">
+              <div class="side-title">БЕНЗИН</div>
+              <div class="side-scale">
+                <span class="side-mark side-mark--left">0</span>
+                <span class="side-mark side-mark--mid">½</span>
+                <span class="side-mark side-mark--right">1</span>
+                <span class="side-tick tick-a"></span>
+                <span class="side-tick tick-b"></span>
+                <span class="side-tick tick-c"></span>
+                <span class="side-tick tick-d"></span>
+                <span class="side-tick tick-e"></span>
+                <span class="side-needle fuel-needle"></span>
+                <span class="side-hub"></span>
+              </div>
+            </div>
+
+            <div class="speedometer">
+              <div id="speedScale" class="speed-scale" aria-hidden="true"></div>
+              <div class="unit">км/ч</div>
+              <div class="needle-wrap" id="needle">
+                <div class="needle"></div>
+                <div class="needle-cap"></div>
+              </div>
+            </div>
+
+            <div class="gauge gauge--temp" aria-label="Температура охлаждающей жидкости">
+              <div class="side-title">ВОДА</div>
+              <div class="side-scale temp-scale">
+                <span class="temp-cold">40</span>
+                <span class="temp-hot">120</span>
+                <span class="danger-zone"></span>
+                <span class="side-tick tick-a"></span>
+                <span class="side-tick tick-b"></span>
+                <span class="side-tick tick-c"></span>
+                <span class="side-tick tick-d"></span>
+                <span class="side-tick tick-e"></span>
+                <span class="side-needle temp-needle"></span>
+                <span class="side-hub"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="warning-strip" aria-label="Контрольные лампы">
+            <div class="warning warning--oil"><span class="oil-icon">●</span><small>МАСЛО</small></div>
+            <div class="warning"><span class="lamp-icon">☼</span><small>СВЕТ</small></div>
+            <div class="warning"><span class="battery-icon">＋ −</span><small>ЗАРЯД</small></div>
+            <div class="warning warning--dim"><span>⇆</span><small>ПОВОРОТ</small></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="badge" aria-label="Жигули">Жигули</div>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

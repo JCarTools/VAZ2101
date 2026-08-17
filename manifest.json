@@ -1,0 +1,9 @@
+{
+  "manifest_version": 3,
+  "name": "ВАЗ-2101 — ретро приборка",
+  "version": "1.0.0",
+  "description": "Минималистичная ретро-приборка со спидометром 0–160 км/ч.",
+  "action": {
+    "default_popup": "index.html"
+  }
+}
