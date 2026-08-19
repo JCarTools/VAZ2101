@@ -346,7 +346,7 @@ body {
 .warning--high-beam.is-active small { color: #70aefa; }
 .warning--dim { opacity: .13; color: #889786; }
 .warning--turn { color: #5dcf6a; opacity: 1; }
-.turn-arrows { display: flex; align-items: center; gap: clamp(1px, .2vw, 4px); font-size: clamp(11px, 1.25vw, 23px); line-height: 1; }
+.turn-arrows { display: flex; align-items: center; gap: clamp(2px, .3vw, 6px); font-size: clamp(17px, 1.9vw, 36px); line-height: .85; }
 .turn-arrow { opacity: .1; filter: saturate(.4); transition: opacity 70ms linear, filter 70ms linear, text-shadow 70ms linear; }
 .warning--turn.is-left .turn-arrow--left,
 .warning--turn.is-right .turn-arrow--right {
