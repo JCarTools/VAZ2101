@@ -266,10 +266,34 @@ body {
   opacity: .45;
   text-shadow: 0 0 .3em currentColor;
 }
-.warning small { margin-top: .55em; color: #706b5e; font-size: clamp(5px, .42vw, 8px); letter-spacing: .12em; text-shadow: none; }
-.warning--oil { color: #f04b27; opacity: 1; }
-.warning--oil span { animation: warmGlow 2.8s ease-in-out infinite; }
+.warning small {
+  margin-top: .48em;
+  color: #999789;
+  font-size: clamp(8px, .72vw, 14px);
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-shadow: 0 1px 1px #050605;
+}
+.warning--reserve { color: #ed642f; opacity: .16; transition: opacity 220ms ease, filter 220ms ease; }
+.warning--reserve.is-active { opacity: 1; filter: brightness(1.08); }
+.warning--reserve.is-active span { animation: warmGlow 2.1s ease-in-out infinite; }
+.warning--high-beam { color: #3a83c9; opacity: .14; transition: opacity 90ms linear, filter 90ms linear; }
+.warning--high-beam.is-active {
+  opacity: 1;
+  filter: brightness(1.2) saturate(1.25);
+  text-shadow: 0 0 .28em #328eff, 0 0 .7em rgba(38, 126, 255, .85);
+}
+.warning--high-beam.is-active small { color: #70aefa; }
 .warning--dim { opacity: .13; color: #889786; }
+.warning--turn { color: #5dcf6a; opacity: 1; }
+.turn-arrows { display: flex; align-items: center; gap: clamp(1px, .2vw, 4px); font-size: clamp(11px, 1.25vw, 23px); line-height: 1; }
+.turn-arrow { opacity: .1; filter: saturate(.4); transition: opacity 70ms linear, filter 70ms linear, text-shadow 70ms linear; }
+.warning--turn.is-left .turn-arrow--left,
+.warning--turn.is-right .turn-arrow--right {
+  opacity: 1;
+  filter: brightness(1.15) saturate(1.2);
+  text-shadow: 0 0 .28em #55df65, 0 0 .65em rgba(79, 222, 94, .8);
+}
 .battery-icon { padding: .22em .28em; border: 1px solid currentColor; font-size: .62em; letter-spacing: .22em; }
 
 @keyframes warmGlow { 50% { filter: brightness(1.3); text-shadow: 0 0 .65em #e54822; } }
@@ -294,6 +318,6 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .warning--oil span { animation: none; }
+  .warning--reserve.is-active span { animation: none; }
   .needle-wrap { transition: none; }
 }

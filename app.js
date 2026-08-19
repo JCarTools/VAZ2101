@@ -11,15 +11,25 @@ const speedometer = document.querySelector(".speedometer");
 const fuelNeedle = document.getElementById("fuelNeedle");
 const fuelLiters = document.getElementById("fuelLiters");
 const fuelScaleFull = document.getElementById("fuelScaleFull");
+const reserveWarning = document.getElementById("reserveWarning");
+const highBeamWarning = document.getElementById("highBeamWarning");
+const turnWarning = document.getElementById("turnWarning");
 const litersFormatter = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 1 });
 const FUEL_EMPTY_ANGLE = -149;
 const FUEL_FULL_ANGLE = -31;
+const TURN_SIGNAL_POLL_INTERVAL = 200;
+const HIGH_BEAM_POLL_INTERVAL = 200;
 
 let targetSpeed = 0;
 let displaySpeed = 0;
 let lastFrame = performance.now();
 let tankCapacityLiters = window.VAZSettings.load().fuel.tankCapacityLiters;
 let fuelPercent = null;
+let fuelPollTimer = null;
+let turnPollTimer = null;
+let highBeamPollTimer = null;
+let leftTurnActive = false;
+let rightTurnActive = false;
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
@@ -112,11 +122,173 @@ function renderFuel() {
   fuelNeedle.style.transform = `rotate(${fuelAngle}deg)`;
 }
 
-function setFuelPercent(value) {
+function setReserve(active) {
+  const isActive = active === true;
+  reserveWarning.classList.toggle("is-active", isActive);
+  reserveWarning.setAttribute("aria-label", isActive ? "Топливо в резерве" : "Резерв топлива не активен");
+}
+
+function setHighBeam(active) {
+  const isActive = active === true;
+  highBeamWarning.classList.toggle("is-active", isActive);
+  highBeamWarning.setAttribute("aria-label", isActive ? "Дальний свет включён" : "Дальний свет выключен");
+}
+
+function setTurnSignals(left, right) {
+  leftTurnActive = left === true;
+  rightTurnActive = right === true;
+  turnWarning.classList.toggle("is-left", leftTurnActive);
+  turnWarning.classList.toggle("is-right", rightTurnActive);
+
+  let label = "Поворотники выключены";
+  if (leftTurnActive && rightTurnActive) label = "Аварийная сигнализация включена";
+  else if (leftTurnActive) label = "Включён левый поворотник";
+  else if (rightTurnActive) label = "Включён правый поворотник";
+  turnWarning.setAttribute("aria-label", label);
+}
+
+function readBoolean(value) {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "number") return value === 1;
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    if (["1", "true", "on", "active", "yes"].includes(normalized)) return true;
+    if (["0", "2", "false", "off", "inactive", "no"].includes(normalized)) return false;
+  }
+  return null;
+}
+
+function setFuelPercent(value, reserveState = null) {
   const numeric = Number(value);
   if (!Number.isFinite(numeric)) return;
   fuelPercent = clamp(numeric, 0, 100);
   renderFuel();
+
+  const explicitReserve = readBoolean(reserveState);
+  setReserve(explicitReserve === null ? fuelPercent <= 10 : explicitReserve);
+}
+
+function applyFuelData(data) {
+  if (!data || typeof data !== "object" || data.error) return false;
+  const percent = data.percent ?? data.value ?? data.fuelPercent;
+  const reserve = data.reserve ?? data.lowFuelWarning ?? data.active;
+  const numeric = Number(percent);
+  if (!Number.isFinite(numeric) || numeric < 0) return false;
+  setFuelPercent(numeric, reserve);
+  return true;
+}
+
+function applyTurnSignalData(data) {
+  if (!data || typeof data !== "object" || data.error) return false;
+
+  const left = readBoolean(data.left ?? data.leftActive ?? data.leftTurnSignal);
+  const right = readBoolean(data.right ?? data.rightActive ?? data.rightTurnSignal);
+  const leftValid = readBoolean(data.leftValid);
+  const rightValid = readBoolean(data.rightValid);
+  const hasLeft = left !== null && leftValid !== false;
+  const hasRight = right !== null && rightValid !== false;
+  if (!hasLeft && !hasRight) return false;
+
+  setTurnSignals(hasLeft ? left : leftTurnActive, hasRight ? right : rightTurnActive);
+  return true;
+}
+
+function applyHighBeamData(data) {
+  if (!data || typeof data !== "object" || data.error) return false;
+  const active = readBoolean(data.highBeam ?? data.active ?? data.value);
+  if (active === null) return false;
+  setHighBeam(active);
+  return true;
+}
+
+function parseCarData(raw) {
+  if (raw && typeof raw === "object") return raw;
+  if (typeof raw !== "string" || !raw.trim()) return null;
+  try {
+    return JSON.parse(raw);
+  } catch (_error) {
+    return null;
+  }
+}
+
+function requestFuelData() {
+  const api = window.androidApi;
+  if (!api) return false;
+
+  try {
+    if (typeof api.getCarData === "function") {
+      const received = applyFuelData(parseCarData(api.getCarData(TOKEN, "fuel")));
+      if (received) return true;
+    }
+    if (typeof api.carCommand === "function") {
+      const command = JSON.stringify({ cmd: "get_fuel_percent" });
+      const received = applyFuelData(parseCarData(api.carCommand(TOKEN, command)));
+      if (received) return true;
+    }
+    if (typeof api.carCmd === "function") {
+      const command = JSON.stringify({ cmd: "get_fuel_percent" });
+      return applyFuelData(parseCarData(api.carCmd(TOKEN, command)));
+    }
+  } catch (_error) {
+    return false;
+  }
+  return false;
+}
+
+function startFuelPolling() {
+  window.clearInterval(fuelPollTimer);
+  requestFuelData();
+  fuelPollTimer = window.setInterval(requestFuelData, 10000);
+}
+
+function requestTurnSignals() {
+  const api = window.androidApi;
+  if (!api || document.hidden) return false;
+  const command = JSON.stringify({ cmd: "get_turn_signals" });
+
+  try {
+    if (typeof api.carCommand === "function") {
+      const received = applyTurnSignalData(parseCarData(api.carCommand(TOKEN, command)));
+      if (received) return true;
+    }
+    if (typeof api.carCmd === "function") {
+      return applyTurnSignalData(parseCarData(api.carCmd(TOKEN, command)));
+    }
+  } catch (_error) {
+    return false;
+  }
+  return false;
+}
+
+function startTurnSignalPolling() {
+  window.clearInterval(turnPollTimer);
+  requestTurnSignals();
+  turnPollTimer = window.setInterval(requestTurnSignals, TURN_SIGNAL_POLL_INTERVAL);
+}
+
+function requestHighBeam() {
+  const api = window.androidApi;
+  if (!api || document.hidden) return false;
+  const command = JSON.stringify({ cmd: "get_high_beam" });
+
+  try {
+    if (typeof api.carCommand === "function") {
+      const received = applyHighBeamData(parseCarData(api.carCommand(TOKEN, command)));
+      if (received) return true;
+    }
+    if (typeof api.carCmd === "function") {
+      return applyHighBeamData(parseCarData(api.carCmd(TOKEN, command)));
+    }
+  } catch (_error) {
+    return false;
+  }
+  return false;
+}
+
+function startHighBeamPolling() {
+  window.clearInterval(highBeamPollTimer);
+  requestHighBeam();
+  highBeamPollTimer = window.setInterval(requestHighBeam, HIGH_BEAM_POLL_INTERVAL);
 }
 
 function animate(frameTime) {
@@ -138,13 +310,32 @@ window.onAndroidEvent = function onAndroidEvent(type, data = {}) {
   const normalizedType = String(type).toLowerCase();
   if (normalizedType === "speed") setSpeed(data.value);
   if (["fuel", "fuellevel", "fuel_level", "tank"].includes(normalizedType)) {
-    setFuelPercent(data.percent ?? data.value);
+    applyFuelData(data);
+  }
+  if (["reserve", "fuelreserve", "fuel_reserve", "lowfuelwarning", "low_fuel_warning"].includes(normalizedType)) {
+    setReserve(readBoolean(data.reserve ?? data.lowFuelWarning ?? data.active ?? data.value));
+  }
+  if (["turnsignals", "turn_signals", "turnsignal", "turn_signal"].includes(normalizedType)) {
+    applyTurnSignalData(data);
+  }
+  if (["leftturn", "left_turn", "leftturnsignal", "left_turn_signal"].includes(normalizedType)) {
+    const active = readBoolean(data.active ?? data.value ?? data.left);
+    if (active !== null) setTurnSignals(active, rightTurnActive);
+  }
+  if (["rightturn", "right_turn", "rightturnsignal", "right_turn_signal"].includes(normalizedType)) {
+    const active = readBoolean(data.active ?? data.value ?? data.right);
+    if (active !== null) setTurnSignals(leftTurnActive, active);
+  }
+  if (["highbeam", "high_beam", "highbeamstatus", "high_beam_status"].includes(normalizedType)) {
+    applyHighBeamData(data);
   }
 };
 
 // Удобный ручной вызов из WebView или консоли: window.setDashboardSpeed(80)
 window.setDashboardSpeed = setSpeed;
 window.setDashboardFuelPercent = setFuelPercent;
+window.setDashboardTurnSignals = setTurnSignals;
+window.setDashboardHighBeam = setHighBeam;
 
 document.addEventListener("DOMContentLoaded", () => {
   buildScale();
@@ -166,6 +357,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let speedDirection = 1;
     let demoFuelPercent = 15;
     let fuelDirection = 1;
+    let demoTurnStep = 0;
 
     setFuelPercent(demoFuelPercent);
 
@@ -178,9 +370,19 @@ document.addEventListener("DOMContentLoaded", () => {
       if (demoFuelPercent <= 5) fuelDirection = 1;
       demoFuelPercent += fuelDirection * 5;
       setFuelPercent(demoFuelPercent);
+
+      demoTurnStep = (demoTurnStep + 1) % 6;
+      setTurnSignals(demoTurnStep === 1 || demoTurnStep === 3, demoTurnStep === 3 || demoTurnStep === 5);
+      setHighBeam(demoTurnStep === 2 || demoTurnStep === 3);
     }, 550);
   } else if (previewParams.has("speed")) {
     setSpeed(previewParams.get("speed"));
+  }
+
+  if (!previewParams.has("demo")) {
+    startFuelPolling();
+    startTurnSignalPolling();
+    startHighBeamPolling();
   }
 
   if (previewParams.has("fuel")) {

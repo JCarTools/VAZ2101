@@ -58,10 +58,18 @@
           </div>
 
           <div class="warning-strip" aria-label="Контрольные лампы">
-            <div class="warning warning--oil"><span class="oil-icon">●</span><small>МАСЛО</small></div>
-            <div class="warning"><span class="lamp-icon">☼</span><small>СВЕТ</small></div>
+            <div class="warning warning--reserve" id="reserveWarning"><span class="reserve-icon">●</span><small>РЕЗЕРВ</small></div>
+            <div class="warning warning--high-beam" id="highBeamWarning" aria-label="Дальний свет выключен">
+              <span class="lamp-icon">☼</span><small>ДАЛЬНИЙ</small>
+            </div>
             <div class="warning"><span class="battery-icon">＋ −</span><small>ЗАРЯД</small></div>
-            <div class="warning warning--dim"><span>⇆</span><small>ПОВОРОТ</small></div>
+            <div class="warning warning--turn" id="turnWarning" aria-label="Поворотники выключены">
+              <span class="turn-arrows" aria-hidden="true">
+                <span class="turn-arrow turn-arrow--left">←</span>
+                <span class="turn-arrow turn-arrow--right">→</span>
+              </span>
+              <small>ПОВОРОТ</small>
+            </div>
           </div>
         </div>
       </div>
