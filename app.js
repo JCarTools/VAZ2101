@@ -34,6 +34,8 @@ let fuelPercent = null;
 let fuelPollTimer = null;
 let turnPollTimer = null;
 let highBeamPollTimer = null;
+let carRequestSequence = 0;
+const pendingCarRequests = new Map();
 let leftTurnActive = false;
 let rightTurnActive = false;
 let reserveActive = false;
@@ -280,9 +282,51 @@ function parseCarData(raw) {
   }
 }
 
+function beginAsyncCarRequest(kind, request) {
+  if (pendingCarRequests.has(kind)) return true;
+
+  const requestId = `${kind}:${++carRequestSequence}`;
+  try {
+    const accepted = request(requestId) === true;
+    if (accepted) pendingCarRequests.set(kind, requestId);
+    return accepted;
+  } catch (_error) {
+    return false;
+  }
+}
+
+function applyAsyncCarResponse(data) {
+  if (!data || typeof data !== "object") return false;
+
+  const requestId = String(data.requestId ?? "");
+  let requestKind = null;
+  for (const [kind, pendingId] of pendingCarRequests) {
+    if (pendingId === requestId) {
+      requestKind = kind;
+      break;
+    }
+  }
+  if (!requestKind) return false;
+
+  pendingCarRequests.delete(requestKind);
+  const response = parseCarData(data.response);
+  if (!response || response.error) return true;
+
+  if (requestKind === "fuel") applyFuelData(response);
+  if (requestKind === "turnSignals") applyTurnSignalData(response);
+  if (requestKind === "highBeam") applyHighBeamData(response);
+  return true;
+}
+
 function requestFuelData() {
   const api = window.androidApi;
   if (!api) return false;
+
+  if (typeof api.requestCarDataAsync === "function") {
+    return beginAsyncCarRequest("fuel", requestId =>
+      api.requestCarDataAsync(TOKEN, requestId, "fuel")
+    );
+  }
 
   try {
     if (typeof api.getCarData === "function") {
@@ -315,6 +359,12 @@ function requestTurnSignals() {
   if (!api || document.hidden) return false;
   const command = JSON.stringify({ cmd: "get_turn_signals" });
 
+  if (typeof api.requestCarCommandAsync === "function") {
+    return beginAsyncCarRequest("turnSignals", requestId =>
+      api.requestCarCommandAsync(TOKEN, requestId, command)
+    );
+  }
+
   try {
     if (typeof api.carCommand === "function") {
       const received = applyTurnSignalData(parseCarData(api.carCommand(TOKEN, command)));
@@ -339,6 +389,12 @@ function requestHighBeam() {
   const api = window.androidApi;
   if (!api || document.hidden) return false;
   const command = JSON.stringify({ cmd: "get_high_beam" });
+
+  if (typeof api.requestCarCommandAsync === "function") {
+    return beginAsyncCarRequest("highBeam", requestId =>
+      api.requestCarCommandAsync(TOKEN, requestId, command)
+    );
+  }
 
   try {
     if (typeof api.carCommand === "function") {
@@ -377,6 +433,9 @@ function animate(frameTime) {
 // Android → JS. Совместимо с форматом виджетов NaviStart.
 window.onAndroidEvent = function onAndroidEvent(type, data = {}) {
   const normalizedType = String(type).toLowerCase();
+  if (["carresponse", "car_response"].includes(normalizedType)) {
+    applyAsyncCarResponse(data);
+  }
   if (normalizedType === "speed") setSpeed(data.value);
   if (["fuel", "fuellevel", "fuel_level", "tank"].includes(normalizedType)) {
     applyFuelData(data);
