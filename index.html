@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ru">
+<html lang="ru" data-i18n-title="dashboard.title">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -8,16 +8,16 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <main class="dashboard" aria-label="Ретро приборная панель ВАЗ-2101">
+  <main class="dashboard" data-i18n-aria-label="dashboard.aria" aria-label="Ретро приборная панель ВАЗ-2101">
     <div class="grain" aria-hidden="true"></div>
 
     <section class="cluster">
       <div class="cluster__rim">
         <div class="cluster__glass">
           <div class="cluster__inner">
-            <div class="gauge gauge--fuel" aria-label="Уровень топлива">
-              <div class="side-title">БЕНЗИН</div>
-              <div class="fuel-readout"><span id="fuelLiters">—</span><small>л</small></div>
+            <div class="gauge gauge--fuel" data-i18n-aria-label="dashboard.fuelAria" aria-label="Уровень топлива">
+              <div class="side-title" data-i18n="dashboard.fuel">БЕНЗИН</div>
+              <div class="fuel-readout"><span id="fuelLiters">—</span><small data-i18n="dashboard.literShort">л</small></div>
               <div class="side-scale">
                 <span class="side-mark side-mark--left" id="fuelScaleEmpty">0</span>
                 <span class="side-mark side-mark--right" id="fuelScaleFull">39</span>
@@ -33,15 +33,15 @@
 
             <div class="speedometer">
               <div id="speedScale" class="speed-scale" aria-hidden="true"></div>
-              <div class="unit">км/ч</div>
+              <div class="unit" data-i18n="dashboard.speedUnit">км/ч</div>
               <div class="needle-wrap" id="needle">
                 <div class="needle"></div>
                 <div class="needle-cap"></div>
               </div>
             </div>
 
-            <div class="gauge gauge--temp" aria-label="Температура охлаждающей жидкости">
-              <div class="side-title">ВОДА</div>
+            <div class="gauge gauge--temp" data-i18n-aria-label="dashboard.tempAria" aria-label="Температура охлаждающей жидкости">
+              <div class="side-title" data-i18n="dashboard.water">ВОДА</div>
               <div class="side-scale temp-scale">
                 <span class="temp-cold">40</span>
                 <span class="temp-hot">120</span>
@@ -57,18 +57,18 @@
             </div>
           </div>
 
-          <div class="warning-strip" aria-label="Контрольные лампы">
-            <div class="warning warning--reserve" id="reserveWarning"><span class="reserve-icon">●</span><small>РЕЗЕРВ</small></div>
+          <div class="warning-strip" data-i18n-aria-label="dashboard.warningAria" aria-label="Контрольные лампы">
+            <div class="warning warning--reserve" id="reserveWarning"><span class="reserve-icon">●</span><small data-i18n="dashboard.reserve">РЕЗЕРВ</small></div>
             <div class="warning warning--high-beam" id="highBeamWarning" aria-label="Дальний свет выключен">
-              <span class="lamp-icon">☼</span><small>ДАЛЬНИЙ</small>
+              <span class="lamp-icon">☼</span><small data-i18n="dashboard.highBeam">ДАЛЬНИЙ</small>
             </div>
-            <div class="warning"><span class="battery-icon">＋ −</span><small>ЗАРЯД</small></div>
+            <div class="warning"><span class="battery-icon">＋ −</span><small data-i18n="dashboard.charge">ЗАРЯД</small></div>
             <div class="warning warning--turn" id="turnWarning" aria-label="Поворотники выключены">
               <span class="turn-arrows" aria-hidden="true">
                 <span class="turn-arrow turn-arrow--left">←</span>
                 <span class="turn-arrow turn-arrow--right">→</span>
               </span>
-              <small>ПОВОРОТ</small>
+              <small data-i18n="dashboard.turn">ПОВОРОТ</small>
             </div>
           </div>
         </div>
@@ -79,6 +79,7 @@
   </main>
 
   <script src="settings-store.js"></script>
+  <script src="i18n.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

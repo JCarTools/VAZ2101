@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ru">
+<html lang="ru" data-i18n-title="settings.title">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
@@ -14,69 +14,102 @@
     <header class="settings-header">
       <div class="settings-brand">
         <div class="settings-brand__name">Жигули</div>
-        <div class="settings-brand__subtitle">настройка приборной панели</div>
+        <div class="settings-brand__subtitle" data-i18n="settings.subtitle">настройка приборной панели</div>
       </div>
       <div class="settings-status" id="saveStatus" role="status" aria-live="polite">
         <span class="settings-status__lamp"></span>
-        <span>Настройки загружены</span>
+        <span data-i18n="settings.loaded">Настройки загружены</span>
       </div>
     </header>
 
     <div class="settings-workspace">
-      <aside class="settings-nav" aria-label="Разделы настроек">
-        <div class="settings-nav__caption">Разделы</div>
-        <button class="settings-nav__item is-active" type="button" aria-current="page">
+      <aside class="settings-nav" data-i18n-aria-label="settings.navAria" aria-label="Разделы настроек">
+        <div class="settings-nav__caption" data-i18n="settings.sections">Разделы</div>
+        <button class="settings-nav__item is-active" type="button" aria-current="page" data-settings-panel="fuelSettingsPanel">
           <span class="settings-nav__icon">◒</span>
           <span>
-            <strong>Топливо</strong>
-            <small>бак и шкала</small>
+            <strong data-i18n="settings.fuelNav">Топливо</strong>
+            <small data-i18n="settings.fuelNavHint">бак и шкала</small>
           </span>
         </button>
-        <div class="settings-nav__future">Здесь появятся следующие настройки приборки</div>
+        <button class="settings-nav__item" type="button" data-settings-panel="languageSettingsPanel">
+          <span class="settings-nav__icon">A</span>
+          <span>
+            <strong data-i18n="settings.languageNav">Язык</strong>
+            <small data-i18n="settings.languageNavHint">язык интерфейса</small>
+          </span>
+        </button>
+        <div class="settings-nav__future" data-i18n="settings.future">Здесь появятся следующие настройки приборки</div>
       </aside>
 
-      <section class="settings-content" aria-labelledby="fuelSettingsTitle">
-        <div class="settings-section-heading">
-          <div>
-            <div class="settings-eyebrow">Топливная система</div>
-            <h1 id="fuelSettingsTitle">Объём топливного бака</h1>
-            <p>Приборка получает остаток топлива в процентах и пересчитывает его в литры по заданному объёму.</p>
-          </div>
-        </div>
-
-        <form id="fuelSettingsForm" class="settings-card" novalidate>
-          <label class="settings-field" for="tankCapacity">
-            <span class="settings-field__text">
-              <strong>Полный объём бака</strong>
-              <small>Используется для цифр шкалы и расчёта оставшихся литров</small>
-            </span>
-            <span class="settings-number">
-              <input id="tankCapacity" name="tankCapacity" type="number" inputmode="decimal" min="10" max="200" step="1" required>
-              <span class="settings-number__unit">л</span>
-            </span>
-          </label>
-
-          <div class="fuel-preview" aria-label="Предварительный вид шкалы топлива">
-            <div class="fuel-preview__title">Шкала в приборке</div>
-            <div class="fuel-preview__scale">
-              <span id="previewEmpty">0</span>
-              <span id="previewHalf">19,5</span>
-              <span id="previewFull">39</span>
+      <div class="settings-content">
+        <section class="settings-panel is-active" id="fuelSettingsPanel" aria-labelledby="fuelSettingsTitle">
+          <div class="settings-section-heading">
+            <div>
+              <div class="settings-eyebrow" data-i18n="settings.fuelEyebrow">Топливная система</div>
+              <h1 id="fuelSettingsTitle" data-i18n="settings.fuelTitle">Объём топливного бака</h1>
+              <p data-i18n="settings.fuelDescription">Приборка получает остаток топлива в процентах и пересчитывает его в литры по заданному объёму.</p>
             </div>
-            <div class="fuel-preview__line"><i></i><i></i><i></i><i></i><i></i></div>
-            <div class="fuel-preview__hint">литры</div>
           </div>
 
-          <div class="settings-card__footer">
-            <span class="settings-validation" id="validationMessage"></span>
-            <button class="settings-save" type="submit">Сохранить</button>
+          <form id="fuelSettingsForm" class="settings-card" novalidate>
+            <label class="settings-field" for="tankCapacity">
+              <span class="settings-field__text">
+                <strong data-i18n="settings.capacityTitle">Полный объём бака</strong>
+                <small data-i18n="settings.capacityHint">Используется для цифр шкалы и расчёта оставшихся литров</small>
+              </span>
+              <span class="settings-number">
+                <input id="tankCapacity" name="tankCapacity" type="number" inputmode="decimal" min="10" max="200" step="1" required>
+                <span class="settings-number__unit" data-i18n="settings.literShort">л</span>
+              </span>
+            </label>
+
+            <div class="fuel-preview" data-i18n-aria-label="settings.previewAria" aria-label="Предварительный вид шкалы топлива">
+              <div class="fuel-preview__title" data-i18n="settings.previewTitle">Шкала в приборке</div>
+              <div class="fuel-preview__scale">
+                <span id="previewEmpty">0</span>
+                <span id="previewHalf">19,5</span>
+                <span id="previewFull">39</span>
+              </div>
+              <div class="fuel-preview__line"><i></i><i></i><i></i><i></i><i></i></div>
+              <div class="fuel-preview__hint" data-i18n="settings.liters">литры</div>
+            </div>
+
+            <div class="settings-card__footer">
+              <span class="settings-validation" id="validationMessage"></span>
+              <button class="settings-save" type="submit" data-i18n="settings.save">Сохранить</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="settings-panel" id="languageSettingsPanel" aria-labelledby="languageSettingsTitle" hidden>
+          <div class="settings-section-heading">
+            <div>
+              <div class="settings-eyebrow" data-i18n="settings.languageEyebrow">Интерфейс</div>
+              <h1 id="languageSettingsTitle" data-i18n="settings.languageTitle">Язык приборной панели</h1>
+              <p data-i18n="settings.languageDescription">Выбранный язык применяется к приборке и этой странице настроек сразу после выбора.</p>
+            </div>
           </div>
-        </form>
-      </section>
+
+          <div class="settings-card">
+            <label class="settings-field" for="languageSelect">
+              <span class="settings-field__text">
+                <strong data-i18n="settings.languageField">Язык интерфейса</strong>
+                <small data-i18n="settings.languageHint">Можно изменить в любое время без перезапуска приборки</small>
+              </span>
+              <select class="settings-select" id="languageSelect" name="language">
+                <option value="ru">Русский</option>
+                <option value="en">English</option>
+              </select>
+            </label>
+          </div>
+        </section>
+      </div>
     </div>
   </main>
 
   <script src="settings-store.js"></script>
+  <script src="i18n.js"></script>
   <script src="settings.js"></script>
 </body>
 </html>

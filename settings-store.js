@@ -4,7 +4,10 @@
   const STORAGE_KEY = "vaz2101Settings";
   const CHANGE_EVENT = "vaz2101-settings-change";
   const DEFAULTS = Object.freeze({
-    version: 1,
+    version: 2,
+    ui: Object.freeze({
+      language: "ru"
+    }),
     fuel: Object.freeze({
       tankCapacityLiters: 39
     })
@@ -31,10 +34,14 @@
 
   function normalize(value) {
     const settings = merge(DEFAULTS, value);
+    if (!isObject(settings.ui)) settings.ui = { ...DEFAULTS.ui };
     if (!isObject(settings.fuel)) settings.fuel = { ...DEFAULTS.fuel };
     const capacity = Number(settings.fuel.tankCapacityLiters);
 
-    settings.version = 1;
+    settings.version = 2;
+    settings.ui.language = ["ru", "en"].includes(settings.ui.language)
+      ? settings.ui.language
+      : DEFAULTS.ui.language;
     settings.fuel.tankCapacityLiters = Number.isFinite(capacity)
       ? Math.min(200, Math.max(10, capacity))
       : DEFAULTS.fuel.tankCapacityLiters;
@@ -68,6 +75,12 @@
     return save(settings);
   }
 
+  function setLanguage(language) {
+    const settings = load();
+    settings.ui.language = language;
+    return save(settings);
+  }
+
   function subscribe(listener) {
     const onLocalChange = (event) => listener(event.detail || load());
     const onStorage = (event) => {
@@ -88,6 +101,7 @@
     load,
     save,
     setTankCapacity,
+    setLanguage,
     subscribe
   });
 })(window);

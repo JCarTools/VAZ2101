@@ -14,7 +14,6 @@ const fuelScaleFull = document.getElementById("fuelScaleFull");
 const reserveWarning = document.getElementById("reserveWarning");
 const highBeamWarning = document.getElementById("highBeamWarning");
 const turnWarning = document.getElementById("turnWarning");
-const litersFormatter = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 1 });
 const FUEL_EMPTY_ANGLE = -149;
 const FUEL_FULL_ANGLE = -31;
 const TURN_SIGNAL_POLL_INTERVAL = 200;
@@ -23,13 +22,18 @@ const HIGH_BEAM_POLL_INTERVAL = 200;
 let targetSpeed = 0;
 let displaySpeed = 0;
 let lastFrame = performance.now();
-let tankCapacityLiters = window.VAZSettings.load().fuel.tankCapacityLiters;
+const initialSettings = window.VAZSettings.load();
+let language = initialSettings.ui.language;
+let litersFormatter = new Intl.NumberFormat(language === "en" ? "en-US" : "ru-RU", { maximumFractionDigits: 1 });
+let tankCapacityLiters = initialSettings.fuel.tankCapacityLiters;
 let fuelPercent = null;
 let fuelPollTimer = null;
 let turnPollTimer = null;
 let highBeamPollTimer = null;
 let leftTurnActive = false;
 let rightTurnActive = false;
+let reserveActive = false;
+let highBeamActive = false;
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
@@ -107,6 +111,19 @@ function formatLiters(value) {
   return litersFormatter.format(value);
 }
 
+function translate(key) {
+  return window.VAZI18n.t(key, language);
+}
+
+function applyDashboardLanguage(nextLanguage) {
+  language = window.VAZI18n.apply(document, nextLanguage);
+  litersFormatter = new Intl.NumberFormat(language === "en" ? "en-US" : "ru-RU", { maximumFractionDigits: 1 });
+  renderFuel();
+  setReserve(reserveActive);
+  setHighBeam(highBeamActive);
+  setTurnSignals(leftTurnActive, rightTurnActive);
+}
+
 function renderFuel() {
   fuelScaleFull.textContent = formatLiters(tankCapacityLiters);
 
@@ -123,15 +140,15 @@ function renderFuel() {
 }
 
 function setReserve(active) {
-  const isActive = active === true;
-  reserveWarning.classList.toggle("is-active", isActive);
-  reserveWarning.setAttribute("aria-label", isActive ? "Топливо в резерве" : "Резерв топлива не активен");
+  reserveActive = active === true;
+  reserveWarning.classList.toggle("is-active", reserveActive);
+  reserveWarning.setAttribute("aria-label", translate(reserveActive ? "dashboard.reserveOn" : "dashboard.reserveOff"));
 }
 
 function setHighBeam(active) {
-  const isActive = active === true;
-  highBeamWarning.classList.toggle("is-active", isActive);
-  highBeamWarning.setAttribute("aria-label", isActive ? "Дальний свет включён" : "Дальний свет выключен");
+  highBeamActive = active === true;
+  highBeamWarning.classList.toggle("is-active", highBeamActive);
+  highBeamWarning.setAttribute("aria-label", translate(highBeamActive ? "dashboard.highBeamOn" : "dashboard.highBeamOff"));
 }
 
 function setTurnSignals(left, right) {
@@ -140,11 +157,11 @@ function setTurnSignals(left, right) {
   turnWarning.classList.toggle("is-left", leftTurnActive);
   turnWarning.classList.toggle("is-right", rightTurnActive);
 
-  let label = "Поворотники выключены";
-  if (leftTurnActive && rightTurnActive) label = "Аварийная сигнализация включена";
-  else if (leftTurnActive) label = "Включён левый поворотник";
-  else if (rightTurnActive) label = "Включён правый поворотник";
-  turnWarning.setAttribute("aria-label", label);
+  let labelKey = "dashboard.turnOff";
+  if (leftTurnActive && rightTurnActive) labelKey = "dashboard.hazardOn";
+  else if (leftTurnActive) labelKey = "dashboard.turnLeft";
+  else if (rightTurnActive) labelKey = "dashboard.turnRight";
+  turnWarning.setAttribute("aria-label", translate(labelKey));
 }
 
 function readBoolean(value) {
@@ -339,12 +356,12 @@ window.setDashboardHighBeam = setHighBeam;
 
 document.addEventListener("DOMContentLoaded", () => {
   buildScale();
-  renderFuel();
+  applyDashboardLanguage(language);
   requestAnimationFrame(animate);
 
   window.VAZSettings.subscribe((settings) => {
     tankCapacityLiters = settings.fuel.tankCapacityLiters;
-    renderFuel();
+    applyDashboardLanguage(settings.ui.language);
   });
 
   if (window.androidApi && typeof window.androidApi.onJsReady === "function") {
