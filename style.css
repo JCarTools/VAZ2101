@@ -194,6 +194,65 @@ body {
   background: radial-gradient(ellipse at 50% 85%, #292c27, #181b18 69%);
 }
 
+.gauge--temp { padding-top: 0; overflow: hidden; }
+.temperature-view {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding-top: 7%;
+}
+.temperature-view[hidden], .mini-map[hidden] { display: none; }
+
+.mini-map {
+  position: absolute;
+  inset: 4%;
+  overflow: hidden;
+  border: 1px solid rgba(196, 199, 188, .24);
+  border-radius: 5%;
+  background: #101410;
+  box-shadow: inset 0 0 1.2vw rgba(0, 0, 0, .8), 0 0 .7vw rgba(0, 0, 0, .55);
+}
+
+.mini-map__image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+.mini-map.has-frame .mini-map__image { opacity: .92; }
+.mini-map.has-frame .mini-map__placeholder { opacity: 0; }
+
+.mini-map__placeholder {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  transition: opacity 180ms ease;
+  background:
+    linear-gradient(28deg, transparent 47%, rgba(107, 112, 101, .12) 48% 51%, transparent 52%),
+    #111510;
+}
+
+.mini-map__placeholder svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.mini-map__placeholder span {
+  position: absolute;
+  right: 5%;
+  bottom: 5%;
+  color: #979b90;
+  font-size: clamp(5px, .42vw, 8px);
+  letter-spacing: .08em;
+}
+.mini-map__road-side { fill: none; stroke: #242b25; stroke-width: 13; }
+.mini-map__road { fill: none; stroke: #6f746b; stroke-width: 8; }
+.mini-map__cross-road { fill: none; stroke: #474d47; stroke-width: 6; }
+.mini-map__route { fill: none; stroke: #c66a35; stroke-width: 3; }
+.mini-map__car { fill: #eee9d4; stroke: #191b18; stroke-width: 1; }
+
 .side-title {
   position: absolute;
   top: 25%;

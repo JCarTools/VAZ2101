@@ -4,9 +4,12 @@
   const STORAGE_KEY = "vaz2101Settings";
   const CHANGE_EVENT = "vaz2101-settings-change";
   const DEFAULTS = Object.freeze({
-    version: 2,
+    version: 3,
     ui: Object.freeze({
       language: "ru"
+    }),
+    display: Object.freeze({
+      rightGaugeMode: "temperature"
     }),
     fuel: Object.freeze({
       tankCapacityLiters: 39
@@ -35,13 +38,17 @@
   function normalize(value) {
     const settings = merge(DEFAULTS, value);
     if (!isObject(settings.ui)) settings.ui = { ...DEFAULTS.ui };
+    if (!isObject(settings.display)) settings.display = { ...DEFAULTS.display };
     if (!isObject(settings.fuel)) settings.fuel = { ...DEFAULTS.fuel };
     const capacity = Number(settings.fuel.tankCapacityLiters);
 
-    settings.version = 2;
+    settings.version = 3;
     settings.ui.language = ["ru", "en"].includes(settings.ui.language)
       ? settings.ui.language
       : DEFAULTS.ui.language;
+    settings.display.rightGaugeMode = ["temperature", "miniMap"].includes(settings.display.rightGaugeMode)
+      ? settings.display.rightGaugeMode
+      : DEFAULTS.display.rightGaugeMode;
     settings.fuel.tankCapacityLiters = Number.isFinite(capacity)
       ? Math.min(200, Math.max(10, capacity))
       : DEFAULTS.fuel.tankCapacityLiters;
@@ -81,6 +88,12 @@
     return save(settings);
   }
 
+  function setRightGaugeMode(mode) {
+    const settings = load();
+    settings.display.rightGaugeMode = mode;
+    return save(settings);
+  }
+
   function subscribe(listener) {
     const onLocalChange = (event) => listener(event.detail || load());
     const onStorage = (event) => {
@@ -102,6 +115,7 @@
     save,
     setTankCapacity,
     setLanguage,
+    setRightGaugeMode,
     subscribe
   });
 })(window);

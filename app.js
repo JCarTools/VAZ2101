@@ -14,6 +14,9 @@ const fuelScaleFull = document.getElementById("fuelScaleFull");
 const reserveWarning = document.getElementById("reserveWarning");
 const highBeamWarning = document.getElementById("highBeamWarning");
 const turnWarning = document.getElementById("turnWarning");
+const temperatureView = document.getElementById("temperatureView");
+const miniMap = document.getElementById("miniMap");
+const miniMapImage = document.getElementById("miniMapImage");
 const FUEL_EMPTY_ANGLE = -149;
 const FUEL_FULL_ANGLE = -31;
 const TURN_SIGNAL_POLL_INTERVAL = 200;
@@ -26,6 +29,7 @@ const initialSettings = window.VAZSettings.load();
 let language = initialSettings.ui.language;
 let litersFormatter = new Intl.NumberFormat(language === "en" ? "en-US" : "ru-RU", { maximumFractionDigits: 1 });
 let tankCapacityLiters = initialSettings.fuel.tankCapacityLiters;
+let rightGaugeMode = initialSettings.display.rightGaugeMode;
 let fuelPercent = null;
 let fuelPollTimer = null;
 let turnPollTimer = null;
@@ -34,6 +38,8 @@ let leftTurnActive = false;
 let rightTurnActive = false;
 let reserveActive = false;
 let highBeamActive = false;
+let miniMapSubscribed = false;
+let lastMiniMapTimestamp = 0;
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
@@ -122,6 +128,52 @@ function applyDashboardLanguage(nextLanguage) {
   setReserve(reserveActive);
   setHighBeam(highBeamActive);
   setTurnSignals(leftTurnActive, rightTurnActive);
+}
+
+function setMiniMapSubscription(enabled) {
+  const api = window.androidApi;
+  if (!api || enabled === miniMapSubscribed) return;
+
+  try {
+    if (enabled && typeof api.subscribeMiniMap === "function") {
+      if (typeof api.setMiniMapTheme === "function") api.setMiniMapTheme(TOKEN, "night");
+      api.subscribeMiniMap(TOKEN);
+      miniMapSubscribed = true;
+    } else if (!enabled && typeof api.unsubscribeMiniMap === "function") {
+      api.unsubscribeMiniMap(TOKEN);
+      miniMapSubscribed = false;
+    }
+  } catch (_error) {
+    miniMapSubscribed = false;
+  }
+}
+
+function applyRightGaugeMode(mode) {
+  rightGaugeMode = mode === "miniMap" ? "miniMap" : "temperature";
+  const showMiniMap = rightGaugeMode === "miniMap";
+  temperatureView.hidden = showMiniMap;
+  miniMap.hidden = !showMiniMap;
+  setMiniMapSubscription(showMiniMap);
+
+  if (!showMiniMap) {
+    lastMiniMapTimestamp = 0;
+    miniMap.classList.remove("has-frame");
+    miniMapImage.removeAttribute("src");
+  }
+}
+
+function applyMiniMapFrame(data) {
+  if (rightGaugeMode !== "miniMap" || !data || typeof data !== "object") return false;
+  const image = data.image ?? data.src ?? data.frame;
+  const timestamp = Number(data.timestamp ?? Date.now());
+  if (typeof image !== "string" || !image.startsWith("data:image/") || !Number.isFinite(timestamp)) return false;
+  if (timestamp <= lastMiniMapTimestamp) return false;
+
+  lastMiniMapTimestamp = timestamp;
+  miniMapImage.onload = () => miniMap.classList.add("has-frame");
+  miniMapImage.onerror = () => miniMap.classList.remove("has-frame");
+  miniMapImage.src = image;
+  return true;
 }
 
 function renderFuel() {
@@ -346,6 +398,9 @@ window.onAndroidEvent = function onAndroidEvent(type, data = {}) {
   if (["highbeam", "high_beam", "highbeamstatus", "high_beam_status"].includes(normalizedType)) {
     applyHighBeamData(data);
   }
+  if (["minimapframe", "mini_map_frame"].includes(normalizedType)) {
+    applyMiniMapFrame(data);
+  }
 };
 
 // Удобный ручной вызов из WebView или консоли: window.setDashboardSpeed(80)
@@ -353,6 +408,7 @@ window.setDashboardSpeed = setSpeed;
 window.setDashboardFuelPercent = setFuelPercent;
 window.setDashboardTurnSignals = setTurnSignals;
 window.setDashboardHighBeam = setHighBeam;
+window.setDashboardMiniMapFrame = (image, timestamp = Date.now()) => applyMiniMapFrame({ image, timestamp });
 
 document.addEventListener("DOMContentLoaded", () => {
   buildScale();
@@ -362,11 +418,13 @@ document.addEventListener("DOMContentLoaded", () => {
   window.VAZSettings.subscribe((settings) => {
     tankCapacityLiters = settings.fuel.tankCapacityLiters;
     applyDashboardLanguage(settings.ui.language);
+    applyRightGaugeMode(settings.display.rightGaugeMode);
   });
 
   if (window.androidApi && typeof window.androidApi.onJsReady === "function") {
     window.androidApi.onJsReady(TOKEN);
   }
+  applyRightGaugeMode(rightGaugeMode);
 
   // Для предпросмотра в браузере: index.html?demo=1
   const previewParams = new URLSearchParams(window.location.search);
@@ -406,3 +464,5 @@ document.addEventListener("DOMContentLoaded", () => {
     setFuelPercent(previewParams.get("fuel"));
   }
 });
+
+window.addEventListener("beforeunload", () => setMiniMapSubscription(false));

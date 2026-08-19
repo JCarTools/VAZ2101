@@ -39,6 +39,13 @@
             <small data-i18n="settings.languageNavHint">язык интерфейса</small>
           </span>
         </button>
+        <button class="settings-nav__item" type="button" data-settings-panel="displaySettingsPanel">
+          <span class="settings-nav__icon">▣</span>
+          <span>
+            <strong data-i18n="settings.displayNav">Экран</strong>
+            <small data-i18n="settings.displayNavHint">правый индикатор</small>
+          </span>
+        </button>
         <div class="settings-nav__future" data-i18n="settings.future">Здесь появятся следующие настройки приборки</div>
       </aside>
 
@@ -100,6 +107,29 @@
               <select class="settings-select" id="languageSelect" name="language">
                 <option value="ru">Русский</option>
                 <option value="en">English</option>
+              </select>
+            </label>
+          </div>
+        </section>
+
+        <section class="settings-panel" id="displaySettingsPanel" aria-labelledby="displaySettingsTitle" hidden>
+          <div class="settings-section-heading">
+            <div>
+              <div class="settings-eyebrow" data-i18n="settings.displayEyebrow">Отображение</div>
+              <h1 id="displaySettingsTitle" data-i18n="settings.displayTitle">Правый индикатор</h1>
+              <p data-i18n="settings.displayDescription">Выберите, что показывать вместо стандартного индикатора температуры воды.</p>
+            </div>
+          </div>
+
+          <div class="settings-card">
+            <label class="settings-field" for="rightGaugeSelect">
+              <span class="settings-field__text">
+                <strong data-i18n="settings.rightGaugeField">Содержимое правого блока</strong>
+                <small data-i18n="settings.rightGaugeHint">Мини-карта работает через навигационный источник Android</small>
+              </span>
+              <select class="settings-select" id="rightGaugeSelect" name="rightGaugeMode">
+                <option value="temperature" data-i18n="settings.rightGaugeTemperature">Температура воды</option>
+                <option value="miniMap" data-i18n="settings.rightGaugeMiniMap">Мини-карта</option>
               </select>
             </label>
           </div>

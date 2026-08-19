@@ -3,6 +3,7 @@ const capacityInput = document.getElementById("tankCapacity");
 const previewHalf = document.getElementById("previewHalf");
 const previewFull = document.getElementById("previewFull");
 const languageSelect = document.getElementById("languageSelect");
+const rightGaugeSelect = document.getElementById("rightGaugeSelect");
 const status = document.getElementById("saveStatus");
 const statusText = status.querySelector("span:last-child");
 const validationMessage = document.getElementById("validationMessage");
@@ -88,6 +89,7 @@ function openPanel(panelId) {
 
 const initialSettings = window.VAZSettings.load();
 capacityInput.value = String(initialSettings.fuel.tankCapacityLiters);
+rightGaugeSelect.value = initialSettings.display.rightGaugeMode;
 applyLanguage(initialSettings.ui.language);
 
 capacityInput.addEventListener("input", () => {
@@ -105,6 +107,12 @@ languageSelect.addEventListener("change", () => {
   const result = window.VAZSettings.setLanguage(languageSelect.value);
   applyLanguage(result.settings.ui.language);
   showStatus(result.ok ? "settings.status.languageSaved" : "settings.status.failed", result.ok);
+});
+
+rightGaugeSelect.addEventListener("change", () => {
+  const result = window.VAZSettings.setRightGaugeMode(rightGaugeSelect.value);
+  rightGaugeSelect.value = result.settings.display.rightGaugeMode;
+  showStatus(result.ok ? "settings.status.displaySaved" : "settings.status.failed", result.ok);
 });
 
 navigationItems.forEach((item) => {

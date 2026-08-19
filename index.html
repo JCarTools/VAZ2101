@@ -40,19 +40,34 @@
               </div>
             </div>
 
-            <div class="gauge gauge--temp" data-i18n-aria-label="dashboard.tempAria" aria-label="Температура охлаждающей жидкости">
-              <div class="side-title" data-i18n="dashboard.water">ВОДА</div>
-              <div class="side-scale temp-scale">
-                <span class="temp-cold">40</span>
-                <span class="temp-hot">120</span>
-                <span class="danger-zone"></span>
-                <span class="side-tick tick-a"></span>
-                <span class="side-tick tick-b"></span>
-                <span class="side-tick tick-c"></span>
-                <span class="side-tick tick-d"></span>
-                <span class="side-tick tick-e"></span>
-                <span class="side-needle temp-needle"></span>
-                <span class="side-hub"></span>
+            <div class="gauge gauge--temp" id="rightGauge">
+              <div class="temperature-view" id="temperatureView" data-i18n-aria-label="dashboard.tempAria" aria-label="Температура охлаждающей жидкости">
+                <div class="side-title" data-i18n="dashboard.water">ВОДА</div>
+                <div class="side-scale temp-scale">
+                  <span class="temp-cold">40</span>
+                  <span class="temp-hot">120</span>
+                  <span class="danger-zone"></span>
+                  <span class="side-tick tick-a"></span>
+                  <span class="side-tick tick-b"></span>
+                  <span class="side-tick tick-c"></span>
+                  <span class="side-tick tick-d"></span>
+                  <span class="side-tick tick-e"></span>
+                  <span class="side-needle temp-needle"></span>
+                  <span class="side-hub"></span>
+                </div>
+              </div>
+              <div class="mini-map" id="miniMap" data-i18n-aria-label="dashboard.miniMapAria" aria-label="Мини-карта навигации" hidden>
+                <img class="mini-map__image" id="miniMapImage" alt="">
+                <div class="mini-map__placeholder" id="miniMapPlaceholder">
+                  <svg viewBox="0 0 120 90" aria-hidden="true">
+                    <path class="mini-map__road-side" d="M-8 72 C25 61 30 37 62 39 S91 16 128 9"/>
+                    <path class="mini-map__road" d="M-8 72 C25 61 30 37 62 39 S91 16 128 9"/>
+                    <path class="mini-map__cross-road" d="M19 -8 C24 23 54 31 59 99"/>
+                    <path class="mini-map__route" d="M60 97 C57 71 48 52 62 39 S91 16 128 9"/>
+                    <path class="mini-map__car" d="M60 68 L54 80 L60 77 L66 80 Z"/>
+                  </svg>
+                  <span data-i18n="dashboard.mapWaiting">ОЖИДАНИЕ КАРТЫ</span>
+                </div>
               </div>
             </div>
           </div>
