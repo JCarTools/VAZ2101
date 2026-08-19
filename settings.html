@@ -122,16 +122,22 @@
           </div>
 
           <div class="settings-card">
-            <label class="settings-field" for="rightGaugeSelect">
+            <div class="settings-field">
               <span class="settings-field__text">
                 <strong data-i18n="settings.rightGaugeField">Содержимое правого блока</strong>
                 <small data-i18n="settings.rightGaugeHint">Мини-карта работает через навигационный источник Android</small>
               </span>
-              <select class="settings-select" id="rightGaugeSelect" name="rightGaugeMode">
-                <option value="temperature" data-i18n="settings.rightGaugeTemperature">Температура воды</option>
-                <option value="miniMap" data-i18n="settings.rightGaugeMiniMap">Мини-карта</option>
-              </select>
-            </label>
+              <div class="settings-toggle" id="rightGaugeToggle" role="group" data-i18n-aria-label="settings.rightGaugeAria" aria-label="Режим правого индикатора">
+                <button class="settings-toggle__option" type="button" data-right-gauge-mode="temperature" aria-pressed="false">
+                  <span class="settings-toggle__icon">♨</span>
+                  <span data-i18n="settings.rightGaugeTemperature">Температура воды</span>
+                </button>
+                <button class="settings-toggle__option" type="button" data-right-gauge-mode="miniMap" aria-pressed="false">
+                  <span class="settings-toggle__icon">⌖</span>
+                  <span data-i18n="settings.rightGaugeMiniMap">Мини-карта</span>
+                </button>
+              </div>
+            </div>
           </div>
         </section>
       </div>

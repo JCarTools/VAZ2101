@@ -271,6 +271,44 @@ button, input, select { font: inherit; }
 
 .settings-select:focus { border-color: #bd683e; box-shadow: 0 0 0 3px rgba(189,104,62,.12); }
 
+.settings-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-width: min(390px, 52%);
+  padding: 3px;
+  border: 1px solid #555850;
+  border-radius: 6px;
+  background: #090b09;
+  box-shadow: inset 0 2px 8px rgba(0,0,0,.7);
+}
+
+.settings-toggle__option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 48px;
+  padding: 10px 14px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: #7e8279;
+  font-size: 13px;
+  cursor: pointer;
+  transition: color 140ms ease, background 140ms ease, border-color 140ms ease;
+}
+
+.settings-toggle__option.is-active {
+  border-color: rgba(213, 207, 190, .24);
+  background: linear-gradient(#d0ccc2, #8d8981);
+  color: #111310;
+  font-weight: 700;
+  box-shadow: 0 3px 10px rgba(0,0,0,.35);
+}
+
+.settings-toggle__option:focus-visible { outline: 2px solid #c96c3f; outline-offset: 2px; }
+.settings-toggle__icon { font-size: 19px; line-height: 1; }
+
 .fuel-preview { padding: 28px 30px 24px; }
 .fuel-preview__title { color: #a9aca2; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; }
 
@@ -335,6 +373,7 @@ button, input, select { font: inherit; }
   .settings-number { width: 100%; }
   .settings-number input { flex: 1; }
   .settings-select { width: 100%; }
+  .settings-toggle { width: 100%; min-width: 0; }
   .fuel-preview { padding: 24px 22px 18px; }
   .settings-card__footer { padding: 16px 22px; }
 }

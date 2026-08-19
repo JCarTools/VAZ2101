@@ -3,7 +3,7 @@ const capacityInput = document.getElementById("tankCapacity");
 const previewHalf = document.getElementById("previewHalf");
 const previewFull = document.getElementById("previewFull");
 const languageSelect = document.getElementById("languageSelect");
-const rightGaugeSelect = document.getElementById("rightGaugeSelect");
+const rightGaugeOptions = document.querySelectorAll("[data-right-gauge-mode]");
 const status = document.getElementById("saveStatus");
 const statusText = status.querySelector("span:last-child");
 const validationMessage = document.getElementById("validationMessage");
@@ -87,9 +87,17 @@ function openPanel(panelId) {
   });
 }
 
+function renderRightGaugeMode(mode) {
+  rightGaugeOptions.forEach((option) => {
+    const active = option.dataset.rightGaugeMode === mode;
+    option.classList.toggle("is-active", active);
+    option.setAttribute("aria-pressed", String(active));
+  });
+}
+
 const initialSettings = window.VAZSettings.load();
 capacityInput.value = String(initialSettings.fuel.tankCapacityLiters);
-rightGaugeSelect.value = initialSettings.display.rightGaugeMode;
+renderRightGaugeMode(initialSettings.display.rightGaugeMode);
 applyLanguage(initialSettings.ui.language);
 
 capacityInput.addEventListener("input", () => {
@@ -109,10 +117,12 @@ languageSelect.addEventListener("change", () => {
   showStatus(result.ok ? "settings.status.languageSaved" : "settings.status.failed", result.ok);
 });
 
-rightGaugeSelect.addEventListener("change", () => {
-  const result = window.VAZSettings.setRightGaugeMode(rightGaugeSelect.value);
-  rightGaugeSelect.value = result.settings.display.rightGaugeMode;
-  showStatus(result.ok ? "settings.status.displaySaved" : "settings.status.failed", result.ok);
+rightGaugeOptions.forEach((option) => {
+  option.addEventListener("click", () => {
+    const result = window.VAZSettings.setRightGaugeMode(option.dataset.rightGaugeMode);
+    renderRightGaugeMode(result.settings.display.rightGaugeMode);
+    showStatus(result.ok ? "settings.status.displaySaved" : "settings.status.failed", result.ok);
+  });
 });
 
 navigationItems.forEach((item) => {
