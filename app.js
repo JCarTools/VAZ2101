@@ -8,10 +8,18 @@ const scale = document.getElementById("speedScale");
 const needle = document.getElementById("needle");
 const needleLine = needle.querySelector(".needle");
 const speedometer = document.querySelector(".speedometer");
+const fuelNeedle = document.getElementById("fuelNeedle");
+const fuelLiters = document.getElementById("fuelLiters");
+const fuelScaleFull = document.getElementById("fuelScaleFull");
+const litersFormatter = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 1 });
+const FUEL_EMPTY_ANGLE = -149;
+const FUEL_FULL_ANGLE = -31;
 
 let targetSpeed = 0;
 let displaySpeed = 0;
 let lastFrame = performance.now();
+let tankCapacityLiters = window.VAZSettings.load().fuel.tankCapacityLiters;
+let fuelPercent = null;
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
@@ -85,6 +93,32 @@ function setSpeed(value) {
   targetSpeed = Number.isFinite(numeric) ? clamp(numeric, MIN_SPEED, MAX_SPEED) : 0;
 }
 
+function formatLiters(value) {
+  return litersFormatter.format(value);
+}
+
+function renderFuel() {
+  fuelScaleFull.textContent = formatLiters(tankCapacityLiters);
+
+  if (fuelPercent === null) {
+    fuelLiters.textContent = "—";
+    fuelNeedle.style.transform = `rotate(${FUEL_EMPTY_ANGLE}deg)`;
+    return;
+  }
+
+  const ratio = fuelPercent / 100;
+  fuelLiters.textContent = formatLiters(tankCapacityLiters * ratio);
+  const fuelAngle = FUEL_EMPTY_ANGLE + ratio * (FUEL_FULL_ANGLE - FUEL_EMPTY_ANGLE);
+  fuelNeedle.style.transform = `rotate(${fuelAngle}deg)`;
+}
+
+function setFuelPercent(value) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return;
+  fuelPercent = clamp(numeric, 0, 100);
+  renderFuel();
+}
+
 function animate(frameTime) {
   const elapsed = Math.min((frameTime - lastFrame) / 1000, 0.1);
   lastFrame = frameTime;
@@ -101,15 +135,26 @@ function animate(frameTime) {
 
 // Android → JS. Совместимо с форматом виджетов NaviStart.
 window.onAndroidEvent = function onAndroidEvent(type, data = {}) {
-  if (type === "speed") setSpeed(data.value);
+  const normalizedType = String(type).toLowerCase();
+  if (normalizedType === "speed") setSpeed(data.value);
+  if (["fuel", "fuellevel", "fuel_level", "tank"].includes(normalizedType)) {
+    setFuelPercent(data.percent ?? data.value);
+  }
 };
 
 // Удобный ручной вызов из WebView или консоли: window.setDashboardSpeed(80)
 window.setDashboardSpeed = setSpeed;
+window.setDashboardFuelPercent = setFuelPercent;
 
 document.addEventListener("DOMContentLoaded", () => {
   buildScale();
+  renderFuel();
   requestAnimationFrame(animate);
+
+  window.VAZSettings.subscribe((settings) => {
+    tankCapacityLiters = settings.fuel.tankCapacityLiters;
+    renderFuel();
+  });
 
   if (window.androidApi && typeof window.androidApi.onJsReady === "function") {
     window.androidApi.onJsReady(TOKEN);
@@ -118,13 +163,27 @@ document.addEventListener("DOMContentLoaded", () => {
   // Для предпросмотра в браузере: index.html?demo=1
   const previewParams = new URLSearchParams(window.location.search);
   if (previewParams.has("demo")) {
-    let direction = 1;
+    let speedDirection = 1;
+    let demoFuelPercent = 15;
+    let fuelDirection = 1;
+
+    setFuelPercent(demoFuelPercent);
+
     setInterval(() => {
-      if (targetSpeed >= 145) direction = -1;
-      if (targetSpeed <= 5) direction = 1;
-      setSpeed(targetSpeed + direction * 10);
+      if (targetSpeed >= 145) speedDirection = -1;
+      if (targetSpeed <= 5) speedDirection = 1;
+      setSpeed(targetSpeed + speedDirection * 10);
+
+      if (demoFuelPercent >= 95) fuelDirection = -1;
+      if (demoFuelPercent <= 5) fuelDirection = 1;
+      demoFuelPercent += fuelDirection * 5;
+      setFuelPercent(demoFuelPercent);
     }, 550);
   } else if (previewParams.has("speed")) {
     setSpeed(previewParams.get("speed"));
+  }
+
+  if (previewParams.has("fuel")) {
+    setFuelPercent(previewParams.get("fuel"));
   }
 });

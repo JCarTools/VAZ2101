@@ -17,16 +17,16 @@
           <div class="cluster__inner">
             <div class="gauge gauge--fuel" aria-label="Уровень топлива">
               <div class="side-title">БЕНЗИН</div>
+              <div class="fuel-readout"><span id="fuelLiters">—</span><small>л</small></div>
               <div class="side-scale">
-                <span class="side-mark side-mark--left">0</span>
-                <span class="side-mark side-mark--mid">½</span>
-                <span class="side-mark side-mark--right">1</span>
+                <span class="side-mark side-mark--left" id="fuelScaleEmpty">0</span>
+                <span class="side-mark side-mark--right" id="fuelScaleFull">39</span>
                 <span class="side-tick tick-a"></span>
                 <span class="side-tick tick-b"></span>
                 <span class="side-tick tick-c"></span>
                 <span class="side-tick tick-d"></span>
                 <span class="side-tick tick-e"></span>
-                <span class="side-needle fuel-needle"></span>
+                <span class="side-needle fuel-needle" id="fuelNeedle"></span>
                 <span class="side-hub"></span>
               </div>
             </div>
@@ -70,6 +70,7 @@
     <div class="badge" aria-label="Жигули">Жигули</div>
   </main>
 
+  <script src="settings-store.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

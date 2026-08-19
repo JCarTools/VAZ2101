@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#090a09">
+  <title>Жигули — настройки приборки</title>
+  <link rel="stylesheet" href="settings.css">
+</head>
+<body>
+  <main class="settings-shell">
+    <div class="settings-grain" aria-hidden="true"></div>
+
+    <header class="settings-header">
+      <div class="settings-brand">
+        <div class="settings-brand__name">Жигули</div>
+        <div class="settings-brand__subtitle">настройка приборной панели</div>
+      </div>
+      <div class="settings-status" id="saveStatus" role="status" aria-live="polite">
+        <span class="settings-status__lamp"></span>
+        <span>Настройки загружены</span>
+      </div>
+    </header>
+
+    <div class="settings-workspace">
+      <aside class="settings-nav" aria-label="Разделы настроек">
+        <div class="settings-nav__caption">Разделы</div>
+        <button class="settings-nav__item is-active" type="button" aria-current="page">
+          <span class="settings-nav__icon">◒</span>
+          <span>
+            <strong>Топливо</strong>
+            <small>бак и шкала</small>
+          </span>
+        </button>
+        <div class="settings-nav__future">Здесь появятся следующие настройки приборки</div>
+      </aside>
+
+      <section class="settings-content" aria-labelledby="fuelSettingsTitle">
+        <div class="settings-section-heading">
+          <div>
+            <div class="settings-eyebrow">Топливная система</div>
+            <h1 id="fuelSettingsTitle">Объём топливного бака</h1>
+            <p>Приборка получает остаток топлива в процентах и пересчитывает его в литры по заданному объёму.</p>
+          </div>
+        </div>
+
+        <form id="fuelSettingsForm" class="settings-card" novalidate>
+          <label class="settings-field" for="tankCapacity">
+            <span class="settings-field__text">
+              <strong>Полный объём бака</strong>
+              <small>Используется для цифр шкалы и расчёта оставшихся литров</small>
+            </span>
+            <span class="settings-number">
+              <input id="tankCapacity" name="tankCapacity" type="number" inputmode="decimal" min="10" max="200" step="1" required>
+              <span class="settings-number__unit">л</span>
+            </span>
+          </label>
+
+          <div class="fuel-preview" aria-label="Предварительный вид шкалы топлива">
+            <div class="fuel-preview__title">Шкала в приборке</div>
+            <div class="fuel-preview__scale">
+              <span id="previewEmpty">0</span>
+              <span id="previewHalf">19,5</span>
+              <span id="previewFull">39</span>
+            </div>
+            <div class="fuel-preview__line"><i></i><i></i><i></i><i></i><i></i></div>
+            <div class="fuel-preview__hint">литры</div>
+          </div>
+
+          <div class="settings-card__footer">
+            <span class="settings-validation" id="validationMessage"></span>
+            <button class="settings-save" type="submit">Сохранить</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  </main>
+
+  <script src="settings-store.js"></script>
+  <script src="settings.js"></script>
+</body>
+</html>
