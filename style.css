@@ -56,10 +56,18 @@ body {
 .cluster {
   position: relative;
   z-index: 1;
-  /* Почти вся ширина экрана, но не выше 86% его высоты. */
-  width: min(97vw, 288vh);
-  aspect-ratio: 3.35 / 1;
+  /* Явные размеры сохраняют пропорцию 3.35:1 даже в старом Android WebView. */
+  width: 97vw;
+  height: 28.9552vw;
   filter: drop-shadow(0 2.2vh 2.2vh rgba(0, 0, 0, .82));
+}
+
+/* На очень широких экранах ограничиваем приборку по высоте, как раньше через min(). */
+@media (min-aspect-ratio: 2.97/1) {
+  .cluster {
+    width: 288vh;
+    height: 85.9701vh;
+  }
 }
 
 .cluster__rim {
@@ -374,7 +382,7 @@ body {
 
 @media (max-aspect-ratio: 1.7/1) {
   .dashboard { padding: 5vh 2vw 12vh; }
-  .cluster { width: 96vw; }
+  .cluster { width: 96vw; height: 28.6567vw; }
 }
 
 @media (prefers-reduced-motion: reduce) {
